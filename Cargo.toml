@@ -1,0 +1,12 @@
+[workspace]
+members = ["projects/*"]
+default-members = [
+    "projects/qr-image-rs",
+]
+exclude = [
+    "projects/.DS_Store",
+    "projects/qr-image-web",
+]
+
+[profile.release]
+lto = true
