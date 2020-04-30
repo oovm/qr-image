@@ -1,36 +1,25 @@
 mod renderer;
 
-#[derive(Debug, Copy, Clone)]
-pub enum CorrectionLevel {
-    /// Level Low: 7% of data bytes can be restored.
-    L,
-    /// Level Medium: 15% of data bytes can be restored.
-    M,
-    /// Level Quartile: 25% of data bytes can be restored.
-    Q,
-    /// Level High: 30% of data bytes can be restored.
-    H,
-}
+pub use image::Luma;
+pub use qrcode::{types::QrError, EcLevel, QrCode, Version};
+
+pub type QrResult<T> = std::result::Result<T, QrError>;
 
 #[derive(Debug, Clone)]
-pub struct QREmbed {
+pub struct QrImage {
     grayscale: bool,
-    correction_level: CorrectionLevel,
+    qr_version: Version,
+    ec_level: EcLevel,
+    enhanced: bool
 }
 
-impl Default for CorrectionLevel {
-    fn default() -> Self {
-        Self::L
-    }
-}
-
-impl Default for QREmbed {
+impl Default for QrImage {
     fn default() -> Self {
         Self {
             grayscale: true,
-            correction_level: Default::default(),
+            qr_version: Version::Normal(1),
+            ec_level: EcLevel::L,
+            enhanced: false
         }
     }
 }
-
-

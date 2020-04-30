@@ -1,25 +1,54 @@
+mod refine;
+mod render;
+
 // use qrcode_generator::QrCodeEcc;
 
-use qrcode::{Version, EcLevel};
+use crate::{Luma, QrCode, QrImage, QrResult,Version};
+use image::{
+    imageops::{resize, FilterType},
+    DynamicImage, GrayImage,
+};
 
 #[test]
-fn test(){
-    use qrcode::QrCode;
-    use image::Luma;
+fn test() {
+    let cfg = QrImage::default();
 
-// Encode some data into bits.
-    let code = QrCode::with_version(b"01234567",Version::Normal(4), EcLevel::L ).unwrap();
+    // Encode some data into bits.
+    let code = cfg.target_qr(b"01234567").unwrap();
+    cfg.image(b"01234567").unwrap();
 
-// Render the bits into an image.
+    // Render the bits into an image.
     let image = code.render::<Luma<u8>>().build();
 
-// Save the image.
+    // Save the image.
     image.save("./qrcode.png").unwrap();
+}
 
-// You can also render it into a string.
-    let string = code.render()
-        .light_color(' ')
-        .dark_color('#')
-        .build();
-    println!("{}", string);
+
+
+
+
+
+impl QrImage {
+    pub fn target_qr(&self, data: &[u8]) -> QrResult<QrCode> {
+        match QrCode::with_version(data, self.qr_version, self.ec_level) {
+            Ok(o) => Ok(o),
+            Err(_) => match QrCode::with_error_correction_level(data, self.ec_level) {
+                Ok(o) => Ok(o),
+                Err(_) => QrCode::new(data),
+            },
+        }
+    }
+    pub fn target_image(&self, qr: &QrCode, image: &DynamicImage) -> DynamicImage {
+        let size = get_size(&qr);
+        let out = resize(&image.into_luma(), 3*size, 3*size, FilterType::Lanczos3);
+        DynamicImage::ImageLuma8(out)
+    }
+}
+
+fn get_size(qr: &QrCode) -> u32 {
+    match qr.version() {
+        Version::Normal(i) => 17 + 4 * i as u32,
+        Version::Micro(_) => unimplemented!(),
+    }
 }
