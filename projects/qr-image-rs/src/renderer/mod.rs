@@ -3,11 +3,8 @@ mod render;
 
 // use qrcode_generator::QrCodeEcc;
 
-use crate::{Luma, QrCode, QrImage, QrResult,Version};
-use image::{
-    imageops::{resize, FilterType},
-    DynamicImage, GrayImage,
-};
+use crate::{Luma, QrCode, QrImage, QrResult, Version};
+use image::{imageops::{resize, FilterType}, DynamicImage, GrayImage};
 
 #[test]
 fn test() {
@@ -15,18 +12,15 @@ fn test() {
 
     // Encode some data into bits.
     let code = cfg.target_qr(b"01234567").unwrap();
-    cfg.image(b"01234567").unwrap();
+    //cfg.image(b"01234567").unwrap();
 
     // Render the bits into an image.
-    let image = code.render::<Luma<u8>>().build();
+    let image = code.render::<Luma<f32>>().build();
 
+    let img = DynamicImage::ImageLuma8(image);
     // Save the image.
     image.save("./qrcode.png").unwrap();
 }
-
-
-
-
 
 
 impl QrImage {
@@ -39,10 +33,13 @@ impl QrImage {
             },
         }
     }
-    pub fn target_image(&self, qr: &QrCode, image: &DynamicImage) -> DynamicImage {
+    pub fn target_image(&self, data: &[u8], img: &DynamicImage) -> QrResult<GrayImage> {
+        let qr = self.target_qr(data)?;
         let size = get_size(&qr);
-        let out = resize(&image.into_luma(), 3*size, 3*size, FilterType::Lanczos3);
-        DynamicImage::ImageLuma8(out)
+        let out = resize(img, 3 * size, 3 * size, FilterType::Lanczos3);
+        let mut img = DynamicImage::ImageRgba8(out).into_luma();
+        self.dithering(&qr, &mut img);
+        return Ok(img)
     }
 }
 

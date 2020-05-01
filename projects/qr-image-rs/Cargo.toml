@@ -11,6 +11,7 @@ edition = "2018"
 
 [dependencies]
 image = "0.23"
+pix = "0.13"
 # qrcode-generator = "4.0"
 qrcode = "0.12"
 

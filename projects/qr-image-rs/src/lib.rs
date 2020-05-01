@@ -10,16 +10,11 @@ pub struct QrImage {
     grayscale: bool,
     qr_version: Version,
     ec_level: EcLevel,
-    enhanced: bool
+    enhanced: bool,
 }
 
 impl Default for QrImage {
     fn default() -> Self {
-        Self {
-            grayscale: true,
-            qr_version: Version::Normal(1),
-            ec_level: EcLevel::L,
-            enhanced: false
-        }
+        Self { grayscale: true, qr_version: Version::Normal(1), ec_level: EcLevel::L, enhanced: false }
     }
 }
