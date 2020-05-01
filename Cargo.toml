@@ -1,11 +1,13 @@
 [workspace]
 members = ["projects/*"]
 default-members = [
-    "projects/qr-image-rs",
+    "projects/qr-image-core",
+    "projects/qr-image-cli",
+    "projects/qr-image-web",
 ]
+
 exclude = [
     "projects/.DS_Store",
-    "projects/qr-image-web",
 ]
 
 [profile.release]

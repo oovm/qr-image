@@ -4,7 +4,6 @@ use image::{
 };
 use qr_image::QrImage;
 
-
 #[test]
 fn test() {
     let cfg = QrImage::default();
