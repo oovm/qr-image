@@ -105,19 +105,4 @@ fn c() {
             }
         }
     }
-
-    for i in get_size(qr) - 24 {
-        for j in get_size(qr) - 24 {
-            if !(([18, 19, 20].contains(i)) || [18, 19, 20].contains(j))
-                || (i < 24 && j < 24)
-                || (i < 24 && j > get_size(qr) - 49)
-                || (i > get_size(qr) - 49 && j < 24)
-                || aligs.contains((i, j))
-                || (i % 3 == 1 && j % 3 == 1)
-                || (bg0.getpixel((i, j))[3] == 0)
-            {
-                qr.putpixel((i + 12, j + 12), bg.getpixel((i, j)))
-            }
-        }
-    }
 }
