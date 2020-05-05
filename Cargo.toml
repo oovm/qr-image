@@ -8,6 +8,7 @@ default-members = [
 
 exclude = [
     "projects/.DS_Store",
+    "projects/qr-image-wolfram",
 ]
 
 [profile.release]

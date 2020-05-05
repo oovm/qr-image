@@ -4,16 +4,13 @@ publish = false
 version = "0.1.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
-repository = "..."
+repository = "https://github.com/GalAster/qr-art"
 readme = "Readme.md"
 license = "MPL-2.0"
 edition = "2018"
 
 [dependencies]
-image = "0.23"
-pix = "0.13"
-# qrcode-generator = "4.0"
-qrcode = "0.12"
+qr-image-core = { version = "0.1", path = "../qr-image-core" }
 
 [dev-dependencies]
 

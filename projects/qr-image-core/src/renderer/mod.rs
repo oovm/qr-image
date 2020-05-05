@@ -19,7 +19,7 @@ impl QrImage {
         let size = qr.width() as u32;
         let out = resize(img, 3 * size, 3 * size, FilterType::Triangle);
         let rgb = unsafe {
-            redraw_locations(&qr, DynamicImage::ImageRgba8(out).into_rgb(), self.dark_color, self.light_color, self.enhanced)
+            redraw_locations(&qr, DynamicImage::ImageRgba8(out).into_rgb(), self.dark_color, self.light_color, self.enhanced, !self.enhanced)
         };
         return Ok(DynamicImage::ImageRgb8(rgb));
     }
@@ -73,7 +73,7 @@ pub unsafe fn get_align_locations(qr: &QrCode) -> Vec<(usize, usize)> {
                 vec![6, 26, 54, 82, 110, 138, 166],
                 vec![6, 30, 58, 86, 114, 142, 170],
             ];
-            let loc: &Vec<usize> = align_location.get_unchecked(ver as usize - 1);
+            let loc= align_location.get_unchecked(ver as usize - 1);
             for a in 0..loc.len() {
                 for b in 0..loc.len() {
                     if !((a == 0 || b == 0) || (a == loc.len() - 1 && b == 0) || (a == 0 && b == loc.len() - 1)) {
@@ -95,7 +95,7 @@ pub unsafe fn get_align_locations(qr: &QrCode) -> Vec<(usize, usize)> {
 }
 
 #[rustfmt::skip]
-pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: Rgb<u8>, enhanced: bool) -> RgbImage {
+pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: Rgb<u8>, enhanced: bool, skip_bg: bool) -> RgbImage {
     let aligns = get_align_locations(qr);
     let mut qr_img = qr_render_rgb(qr, dark, light);
     for i in 0..qr_img.width() - 0 {
@@ -107,7 +107,7 @@ pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: 
             || (enhanced && [18, 19, 20].contains(&j))
             || (enhanced && aligns.contains(&(i as usize + 12, j as usize + 12)))
             || (i % 3 == 1 && j % 3 == 1)
-            || bg.unsafe_get_pixel(i, j) == Rgb([0, 0, 0])
+            || (!skip_bg && bg.unsafe_get_pixel(i, j) == dark)
             {
                 continue;
             }

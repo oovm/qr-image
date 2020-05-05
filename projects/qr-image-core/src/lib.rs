@@ -10,11 +10,11 @@ pub type QrResult<T> = std::result::Result<T, QrError>;
 
 #[derive(Debug, Clone)]
 pub struct QrImage {
-    qr_version: Version,
-    ec_level: EcLevel,
-    dark_color: Rgb<u8>,
-    light_color: Rgb<u8>,
-    enhanced: bool,
+    pub qr_version: Version,
+    pub ec_level: EcLevel,
+    pub dark_color: Rgb<u8>,
+    pub light_color: Rgb<u8>,
+    pub enhanced: bool,
 }
 
 impl Default for QrImage {
