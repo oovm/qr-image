@@ -2,7 +2,6 @@ use image::{
     imageops::{resize, FilterType},
     open, DynamicImage, GrayImage,
 };
-use qr_image::QrImage;
 
 #[test]
 fn test() {

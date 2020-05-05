@@ -1,11 +1,27 @@
-use crate::{QrCode, QrImage, Version};
-use image::{DynamicImage, GenericImage, GenericImageView, GrayImage, Rgb, RgbImage};
-use qrcode::render::Pixel;
-use std::ops::Mul;
+use crate::{QrCode, QrImage, QrResult, Version};
+use image::{
+    imageops::{resize, FilterType},
+    DynamicImage, GenericImage, GenericImageView, Rgb, RgbImage,
+};
 
 impl QrImage {
-    pub fn render(&self) {
-        unimplemented!()
+    fn target_qr(&self, data: &[u8]) -> QrResult<QrCode> {
+        match QrCode::with_version(data, self.qr_version, self.ec_level) {
+            Ok(o) => Ok(o),
+            Err(_) => match QrCode::with_error_correction_level(data, self.ec_level) {
+                Ok(o) => Ok(o),
+                Err(_) => QrCode::new(data),
+            },
+        }
+    }
+    pub fn render(&self, data: &[u8], img: &DynamicImage) -> QrResult<DynamicImage> {
+        let qr = self.target_qr(data)?;
+        let size = qr.width() as u32;
+        let out = resize(img, 3 * size, 3 * size, FilterType::Triangle);
+        let rgb = unsafe {
+            redraw_locations(&qr, DynamicImage::ImageRgba8(out).into_rgb(), self.dark_color, self.light_color, self.enhanced)
+        };
+        return Ok(DynamicImage::ImageRgb8(rgb));
     }
     pub fn render_frames(&self) {
         unimplemented!()
@@ -57,12 +73,12 @@ pub unsafe fn get_align_locations(qr: &QrCode) -> Vec<(usize, usize)> {
                 vec![6, 26, 54, 82, 110, 138, 166],
                 vec![6, 30, 58, 86, 114, 142, 170],
             ];
-            let loc: &Vec<usize> = align_location.get_unchecked(ver as usize - 2);
-            for a in loc.to_vec() {
-                for b in loc.to_vec() {
+            let loc: &Vec<usize> = align_location.get_unchecked(ver as usize - 1);
+            for a in 0..loc.len() {
+                for b in 0..loc.len() {
                     if !((a == 0 || b == 0) || (a == loc.len() - 1 && b == 0) || (a == 0 && b == loc.len() - 1)) {
-                        for i in (loc.get_unchecked(a) - 2).mul(3)..(loc.get_unchecked(a) + 3).mul(3) {
-                            for j in (loc.get_unchecked(b) - 2).mul(3)..(loc.get_unchecked(b) + 3).mul(3) {
+                        for i in (loc.get_unchecked(a) * 3 - 6)..(loc.get_unchecked(a) * 3 + 9) {
+                            for j in (loc.get_unchecked(b) * 3 - 6)..(loc.get_unchecked(b) * 3 + 9) {
                                 aligns.push((i, j))
                             }
                         }
@@ -78,25 +94,31 @@ pub unsafe fn get_align_locations(qr: &QrCode) -> Vec<(usize, usize)> {
     return aligns;
 }
 
-pub unsafe fn redraw_rgb(qr: &mut QrCode, bg: &RgbImage) {
-    let aligs = get_align_locations(qr);
-    let mut qr_img = qr_render_rgb(qr);
-    for i in 0..qr.width() - 24 {
-        for j in 0..qr.width() - 24 {
-            if !(([18, 19, 20].contains(&i)) || [18, 19, 20].contains(&j))
-                || (i < 24 && j < 24)
-                || (i < 24 && j > qr.width() - 49)
-                || (i > qr.width() - 49 && j < 24)
-                || aligs.contains(&(i as usize, j as usize))
-                || (i % 3 == 1 && j % 3 == 1)
-            //|| (bg.unsafe_get_pixel(i as u32, j as u32).0.get_unchecked(2) == &0)
+#[rustfmt::skip]
+pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: Rgb<u8>, enhanced: bool) -> RgbImage {
+    let aligns = get_align_locations(qr);
+    let mut qr_img = qr_render_rgb(qr, dark, light);
+    for i in 0..qr_img.width() - 0 {
+        for j in 0..qr_img.width() - 0 {
+            if (i < 21 && j < 21)
+            || (i < 21 && j > qr_img.width() - 22)
+            || (i > qr_img.width() - 22 && j < 21)
+            || (enhanced && [18, 19, 20].contains(&i))
+            || (enhanced && [18, 19, 20].contains(&j))
+            || (enhanced && aligns.contains(&(i as usize + 12, j as usize + 12)))
+            || (i % 3 == 1 && j % 3 == 1)
+            || bg.unsafe_get_pixel(i, j) == Rgb([0, 0, 0])
             {
-                qr_img.unsafe_put_pixel(i as u32 + 12, j as u32 + 12, bg.unsafe_get_pixel(i as u32, j as u32))
+                continue;
+            }
+            else {
+                qr_img.unsafe_put_pixel(i, j, bg.unsafe_get_pixel(i, j))
             }
         }
     }
+    return qr_img;
 }
 
 pub fn qr_render_rgb(qr: &QrCode, dark: Rgb<u8>, light: Rgb<u8>) -> RgbImage {
-    qr.render().quiet_zone(false).module_dimensions(1, 1).dark_color(dark).light_color(light).build()
+    qr.render().quiet_zone(false).module_dimensions(3, 3).dark_color(dark).light_color(light).build()
 }
