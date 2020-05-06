@@ -1,13 +1,15 @@
 # OS
-.DS_Store/**/*
+.DS_Store/
 
 # IDE
-.vscode/**/*
-.vs/**/*
-.idea/**/*
+.vscode/
+.vs/
+.idea/
 *.iml
 
 # Rust
-target/**/*
+dist/
+target/
 Cargo.lock
 *.nb
+*.ps1

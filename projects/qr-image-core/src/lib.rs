@@ -2,8 +2,7 @@ mod drawer;
 mod renderer;
 
 pub use crate::drawer::Canvas;
-pub use image::Luma;
-use image::Rgb;
+pub use image::{Luma, Rgb};
 pub use qrcode::{types::QrError, EcLevel, QrCode, Version};
 
 pub type QrResult<T> = std::result::Result<T, QrError>;

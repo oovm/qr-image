@@ -1,12 +1,9 @@
 #![recursion_limit = "1024"]
 
-use yew::{
-    format::Json,
-    html,
-    prelude::*,
-    services::storage::{Area, StorageService},
-    Component, ComponentLink, Html, ShouldRender,
-};
+use qr_image_core::{EcLevel, Rgb, Version};
+use std::str::FromStr;
+use yew::{html, prelude::*, Component, ComponentLink, Html, ShouldRender};
+
 mod form;
 
 pub fn header_view() -> Html {
@@ -21,12 +18,24 @@ pub fn header_view() -> Html {
 
 pub enum Event {
     Input(String),
+    OutputSize(ChangeData),
+    QRVersion(ChangeData),
+    ECLevel(ChangeData),
+    DarkColor(ChangeData),
+    LightColor(ChangeData),
+    EnhanceMode(ChangeData),
 }
 
+#[derive(Debug)]
 pub struct Model {
     link: ComponentLink<Self>,
-    storage: StorageService,
     input: String,
+    output_size: u32,
+    qr_version: Version,
+    ec_level: EcLevel,
+    dark_color: Rgb<u8>,
+    light_color: Rgb<u8>,
+    enhanced: bool,
 }
 
 impl Component for Model {
@@ -34,22 +43,41 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let storage = StorageService::new(Area::Local).expect("storage was unavailable!");
-        let input = {
-            match storage.restore("tex") {
-                Json(Ok(restored_model)) => restored_model,
-                _ => String::from(r#"\int_{\partial M}^{}\omega＝\int_{M}^{}\mathrm{d}\,\omega"#),
-            }
-        };
-        Self { link, storage, input }
+        Self {
+            link,
+            input: String::new(),
+            output_size: 400,
+            qr_version: Version::Normal(3),
+            ec_level: EcLevel::L,
+            dark_color: Rgb([0, 0, 0]),
+            light_color: Rgb([255, 255, 255]),
+            enhanced: false,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Event::Input(s) => {
                 self.input = s;
-                self.storage.store("tex", Json(&self.input))
             }
+            Event::OutputSize(data) => match data {
+                ChangeData::Value(v) => match u32::from_str(&v) {
+                    Ok(o) => self.output_size = o,
+                    Err(_) => (),
+                },
+                _ => (),
+            },
+            Event::QRVersion(data) => match data {
+                ChangeData::Value(v) => match i16::from_str(&v) {
+                    Ok(o) => self.qr_version = Version::Normal(o),
+                    Err(_) => (),
+                },
+                _ => (),
+            },
+            Event::ECLevel(_) => unimplemented!(),
+            Event::DarkColor(_) => unimplemented!(),
+            Event::LightColor(_) => unimplemented!(),
+            Event::EnhanceMode(_) => unimplemented!(),
         }
         true
     }
@@ -62,16 +90,13 @@ impl Component for Model {
         html! {
         <main class="container-fluid">
             <div class="page-header">
-                <h1>{"qrcode.vue:"}</h1>
+                <h1>{"QR Image Embed"}</h1>
             </div>
             {self.form_view()}
         </main>
         }
     }
 }
-
-
-
 
 fn main() {
     yew::start_app::<Model>();
