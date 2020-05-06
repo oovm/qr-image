@@ -10,7 +10,7 @@ license = "MPL-2.0"
 edition = "2018"
 
 [dependencies]
-qr-image-core = { version = "0.1", path = "../qr-image-core" }
+qr-image-core = { version = "0.2", path = "../qr-image-core" }
 
 [dev-dependencies]
 

@@ -6,4 +6,4 @@ release = true
 # The output dir for all final assets.
 dist = "dist"
 # The public URL from which assets are to be served.
-public_url = "/qr-art/"
+public_url = "/qr-image/"

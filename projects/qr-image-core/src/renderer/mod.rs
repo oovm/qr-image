@@ -6,13 +6,7 @@ use image::{
 
 impl QrImage {
     fn target_qr(&self, data: &[u8]) -> QrResult<QrCode> {
-        match QrCode::with_version(data, self.qr_version, self.ec_level) {
-            Ok(o) => Ok(o),
-            Err(_) => match QrCode::with_error_correction_level(data, self.ec_level) {
-                Ok(o) => Ok(o),
-                Err(_) => QrCode::new(data),
-            },
-        }
+        QrCode::with_version(data, self.qr_version, self.ec_level)
     }
     pub fn render(&self, data: &[u8], img: &DynamicImage) -> QrResult<DynamicImage> {
         let qr = self.target_qr(data)?;
@@ -107,6 +101,7 @@ pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: 
     let mut qr_img = qr_render_rgb(qr, dark, light);
     for i in 0..qr_img.width() - 0 {
         for j in 0..qr_img.width() - 0 {
+            let _ = skip_bg;
             if (i < 21 && j < 21)
             || (i < 21 && j > qr_img.width() - 22)
             || (i > qr_img.width() - 22 && j < 21)
@@ -114,7 +109,7 @@ pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: 
             || (enhanced && [18, 19, 20].contains(&j))
             || (enhanced && aligns.contains(&(i as usize + 12, j as usize + 12)))
             || (i % 3 == 1 && j % 3 == 1)
-            || (!skip_bg && bg.unsafe_get_pixel(i, j) == dark)
+            //|| (!skip_bg && bg.unsafe_get_pixel(i, j) == dark)
             {
                 continue;
             }

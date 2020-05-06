@@ -11,4 +11,8 @@ edition = "2018"
 
 [dependencies]
 yew = "0.17"
-qr-image-core = {version = "0.1", path = "../qr-image-core"}
+qr-image-core = {version = "0.2", path = "../qr-image-core"}
+colors-transform = "0.2"
+image = "0.23"
+base64 = "0.13"
+anyhow = "1.0"

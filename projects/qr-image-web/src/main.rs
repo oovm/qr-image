@@ -1,8 +1,15 @@
 #![recursion_limit = "1024"]
 
+use colors_transform::Color;
 use qr_image_core::{EcLevel, Rgb, Version};
 use std::str::FromStr;
-use yew::{html, prelude::*, Component, ComponentLink, Html, ShouldRender};
+use yew::{
+    html,
+    prelude::*,
+    services::{reader::FileData, ConsoleService, Task},
+    Component, ComponentLink, Html, ShouldRender,
+};
+use yew::services::reader::ReaderService;
 
 mod form;
 
@@ -24,13 +31,16 @@ pub enum Event {
     DarkColor(ChangeData),
     LightColor(ChangeData),
     EnhanceMode(ChangeData),
+    Files(ChangeData),
+    Loaded(FileData),
 }
 
 #[derive(Debug)]
 pub struct Model {
     link: ComponentLink<Self>,
     input: String,
-    output_size: u32,
+    image: Vec<u8>,
+    output_size: usize,
     qr_version: Version,
     ec_level: EcLevel,
     dark_color: Rgb<u8>,
@@ -45,7 +55,8 @@ impl Component for Model {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             link,
-            input: String::new(),
+            input: String::from("https://galaster.github.io/qr-image"),
+            image: include_bytes!("github.png").to_vec(),
             output_size: 400,
             qr_version: Version::Normal(3),
             ec_level: EcLevel::L,
@@ -60,24 +71,52 @@ impl Component for Model {
             Event::Input(s) => {
                 self.input = s;
             }
-            Event::OutputSize(data) => match data {
-                ChangeData::Value(v) => match u32::from_str(&v) {
-                    Ok(o) => self.output_size = o,
-                    Err(_) => (),
-                },
-                _ => (),
-            },
-            Event::QRVersion(data) => match data {
-                ChangeData::Value(v) => match i16::from_str(&v) {
-                    Ok(o) => self.qr_version = Version::Normal(o),
-                    Err(_) => (),
-                },
-                _ => (),
-            },
-            Event::ECLevel(_) => unimplemented!(),
-            Event::DarkColor(_) => unimplemented!(),
-            Event::LightColor(_) => unimplemented!(),
-            Event::EnhanceMode(_) => unimplemented!(),
+            Event::OutputSize(data) => {
+                if let ChangeData::Value(v) = data {
+                    if let Ok(o) = usize::from_str(&v) {
+                        self.output_size = o
+                    }
+                }
+            }
+            Event::QRVersion(data) => {
+                if let ChangeData::Value(v) = data {
+                    if let Ok(o) = i16::from_str(&v) {
+                        self.qr_version = Version::Normal(o)
+                    }
+                }
+            }
+            Event::ECLevel(data) => {
+                if let ChangeData::Value(v) = data {
+                    self.input = v
+                }
+            }
+            Event::DarkColor(data) => {
+                if let ChangeData::Value(v) = data {
+                    if let Ok(color) = colors_transform::Rgb::from_hex_str(&v) {
+                        self.dark_color = Rgb([color.get_red() as u8, color.get_green() as u8, color.get_blue() as u8])
+                    }
+                }
+            }
+            Event::LightColor(data) => {
+                if let ChangeData::Value(v) = data {
+                    if let Ok(color) = colors_transform::Rgb::from_hex_str(&v) {
+                        self.light_color = Rgb([color.get_red() as u8, color.get_green() as u8, color.get_blue() as u8])
+                    }
+                }
+            }
+            Event::EnhanceMode(_) => self.enhanced = !self.enhanced,
+            Event::Files(data) =>
+            {
+                if let ChangeData::Files(f) = data {
+                    ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::Loaded))
+                        .unwrap()
+                        .is_active();
+                }
+            }
+            Event::Loaded(data) => {
+                ConsoleService::log(&format!("{:?}", data));
+                self.image = data.content
+            }
         }
         true
     }
@@ -91,6 +130,10 @@ impl Component for Model {
         <main class="container-fluid">
             <div class="page-header">
                 <h1>{"QR Image Embed"}</h1>
+                <iframe
+                    src="https://ghbtns.com/github-btn.html?user=GalAster&repo=qr-image&type=star&count=true&size=large"
+                    frameborder="0" scrolling="0" width="170" height="30" title="GitHub"
+                />
             </div>
             {self.form_view()}
         </main>

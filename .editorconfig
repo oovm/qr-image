@@ -2,10 +2,10 @@
 charset = utf-8
 
 
-[*.pest]
+[*.{css, scss}]
 indent_style = space
 indent_size = 4
 
-[*.toml]
+[*.html]
 indent_style = space
 indent_size = 4
