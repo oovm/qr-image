@@ -1,0 +1,37 @@
+name: Publish Examples
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+          override: true
+          profile: minimal
+      - uses: jetli/wasm-bindgen-action@v0.1.0
+      - name: Install trunk 🗝
+        run: |
+          brew install trunk
+      - name: Build website 💣
+        run: |
+          cd projects/qr-image-web
+          wasm-bindgen -V
+          trunk -V
+          trunk build --release
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: projects/qr-image-web/dist
+          CLEAN: true
