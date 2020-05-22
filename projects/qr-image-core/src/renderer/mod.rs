@@ -15,7 +15,7 @@ impl QrImage {
         let rgb = unsafe {
             redraw_locations(
                 &qr,
-                DynamicImage::ImageRgba8(out).into_rgb(),
+                DynamicImage::ImageRgba8(out).into_rgb8(),
                 self.dark_color,
                 self.light_color,
                 self.enhanced,
@@ -33,7 +33,8 @@ pub unsafe fn get_align_locations(qr: &QrCode) -> Vec<(usize, usize)> {
     let mut aligns = vec![];
     match qr.version() {
         Version::Normal(ver) => {
-            let align_location: &[Vec<usize>; 39] = &[
+            let align_location: &[Vec<usize>; 40] = &[
+                vec![],
                 vec![6, 18],
                 vec![6, 22],
                 vec![6, 26],
@@ -107,7 +108,7 @@ pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: 
             || (i > qr_img.width() - 22 && j < 21)
             || (enhanced && [18, 19, 20].contains(&i))
             || (enhanced && [18, 19, 20].contains(&j))
-            || (enhanced && aligns.contains(&(i as usize + 12, j as usize + 12)))
+            || (enhanced && aligns.contains(&(i as usize + 0, j as usize + 0)))
             || (i % 3 == 1 && j % 3 == 1)
             //|| (!skip_bg && bg.unsafe_get_pixel(i, j) == dark)
             {

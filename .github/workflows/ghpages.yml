@@ -21,7 +21,7 @@ jobs:
       - uses: jetli/wasm-bindgen-action@v0.1.0
       - name: Install trunk 🗝
         run: |
-          brew install trunk
+          cargo install trunk
       - name: Build website 💣
         run: |
           cd projects/qr-image-web

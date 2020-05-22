@@ -6,22 +6,14 @@ use std::str::FromStr;
 use yew::{
     html,
     prelude::*,
-    services::{reader::FileData, ConsoleService, Task},
+    services::{
+        reader::{FileChunk, FileData, ReaderService, ReaderTask},
+        ConsoleService, Task,
+    },
     Component, ComponentLink, Html, ShouldRender,
 };
-use yew::services::reader::ReaderService;
 
 mod form;
-
-pub fn header_view() -> Html {
-    let title = "KaTeX for Yew";
-    html! {
-    <header>
-        <h1 color="#009688">{title}</h1>
-        <a href="https://github.com/GalAster/yew-katex">{"Fork me!"}</a>
-    </header>
-    }
-}
 
 pub enum Event {
     Input(String),
@@ -32,12 +24,14 @@ pub enum Event {
     LightColor(ChangeData),
     EnhanceMode(ChangeData),
     Files(ChangeData),
+    Chunk(Option<FileChunk>),
     Loaded(FileData),
 }
 
 #[derive(Debug)]
 pub struct Model {
     link: ComponentLink<Self>,
+    tasks: Vec<ReaderTask>,
     input: String,
     image: Vec<u8>,
     output_size: usize,
@@ -55,6 +49,7 @@ impl Component for Model {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             link,
+            tasks: vec![],
             input: String::from("https://galaster.github.io/qr-image"),
             image: include_bytes!("github.png").to_vec(),
             output_size: 400,
@@ -105,18 +100,20 @@ impl Component for Model {
                 }
             }
             Event::EnhanceMode(_) => self.enhanced = !self.enhanced,
-            Event::Files(data) =>
-            {
+            Event::Files(data) => {
                 if let ChangeData::Files(f) = data {
-                    ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::Loaded))
-                        .unwrap()
-                        .is_active();
+                    let task = ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::Loaded)).unwrap();
+                    self.tasks.push(task)
                 }
             }
+            Event::Chunk(Some(chunk)) => {
+                ConsoleService::log(&format!("{:?}", chunk));
+            }
             Event::Loaded(data) => {
-                ConsoleService::log(&format!("{:?}", data));
+                // ConsoleService::log(&format!("{:?}", data));
                 self.image = data.content
             }
+            _ => (),
         }
         true
     }
@@ -132,7 +129,7 @@ impl Component for Model {
                 <h1>{"QR Image Embed"}</h1>
                 <iframe
                     src="https://ghbtns.com/github-btn.html?user=GalAster&repo=qr-image&type=star&count=true&size=large"
-                    frameborder="0" scrolling="0" width="170" height="30" title="GitHub"
+                    frameborder="0" scrolling="0" width="170" height="30" title="GitHub" loading="lazy"
                 />
             </div>
             {self.form_view()}

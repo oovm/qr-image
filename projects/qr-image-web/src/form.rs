@@ -78,7 +78,7 @@ impl Model {
                 <label class="col-sm-3 control-label">{"QR Version:"}</label>
                 <div class="col-sm-8">
                     <div class="form-control-static">
-                        <input type="range" min="1" max="20" step="1"
+                        <input type="range" min="1" max="10" step="1"
                             value=self.qr_version_view()
                             onchange=self.link.callback(|input: ChangeData| Event::QRVersion(input))
                         />
