@@ -8,7 +8,7 @@ use yew::{
     prelude::*,
     services::{
         reader::{FileChunk, FileData, ReaderService, ReaderTask},
-        ConsoleService, Task,
+        ConsoleService,
     },
     Component, ComponentLink, Html, ShouldRender,
 };
@@ -53,11 +53,11 @@ impl Component for Model {
             input: String::from("https://galaster.github.io/qr-image"),
             image: include_bytes!("github.png").to_vec(),
             output_size: 400,
-            qr_version: Version::Normal(3),
+            qr_version: Version::Normal(1),
             ec_level: EcLevel::L,
             dark_color: Rgb([0, 0, 0]),
             light_color: Rgb([255, 255, 255]),
-            enhanced: false,
+            enhanced: true,
         }
     }
 
@@ -66,45 +66,39 @@ impl Component for Model {
             Event::Input(s) => {
                 self.input = s;
             }
-            Event::OutputSize(data) => {
-                if let ChangeData::Value(v) = data {
-                    if let Ok(o) = usize::from_str(&v) {
-                        self.output_size = o
-                    }
+            Event::OutputSize(ChangeData::Value(v)) => {
+                if let Ok(o) = usize::from_str(&v) {
+                    self.output_size = o
                 }
             }
-            Event::QRVersion(data) => {
-                if let ChangeData::Value(v) = data {
-                    if let Ok(o) = i16::from_str(&v) {
-                        self.qr_version = Version::Normal(o)
-                    }
+            Event::QRVersion(ChangeData::Value(v)) => {
+                if let Ok(o) = i16::from_str(&v) {
+                    self.qr_version = Version::Normal(o)
                 }
             }
-            Event::ECLevel(data) => {
-                if let ChangeData::Value(v) = data {
-                    self.input = v
+            Event::ECLevel(ChangeData::Select(s)) => {
+                let ec = match s.value().as_ref() {
+                    "L" => EcLevel::L,
+                    "M" => EcLevel::M,
+                    "H" => EcLevel::H,
+                    _ => EcLevel::Q,
+                };
+                self.ec_level = ec
+            }
+            Event::DarkColor(ChangeData::Value(v)) => {
+                if let Ok(color) = colors_transform::Rgb::from_hex_str(&v) {
+                    self.dark_color = Rgb([color.get_red() as u8, color.get_green() as u8, color.get_blue() as u8])
                 }
             }
-            Event::DarkColor(data) => {
-                if let ChangeData::Value(v) = data {
-                    if let Ok(color) = colors_transform::Rgb::from_hex_str(&v) {
-                        self.dark_color = Rgb([color.get_red() as u8, color.get_green() as u8, color.get_blue() as u8])
-                    }
-                }
-            }
-            Event::LightColor(data) => {
-                if let ChangeData::Value(v) = data {
-                    if let Ok(color) = colors_transform::Rgb::from_hex_str(&v) {
-                        self.light_color = Rgb([color.get_red() as u8, color.get_green() as u8, color.get_blue() as u8])
-                    }
+            Event::LightColor(ChangeData::Value(v)) => {
+                if let Ok(color) = colors_transform::Rgb::from_hex_str(&v) {
+                    self.light_color = Rgb([color.get_red() as u8, color.get_green() as u8, color.get_blue() as u8])
                 }
             }
             Event::EnhanceMode(_) => self.enhanced = !self.enhanced,
-            Event::Files(data) => {
-                if let ChangeData::Files(f) = data {
-                    let task = ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::Loaded)).unwrap();
-                    self.tasks.push(task)
-                }
+            Event::Files(ChangeData::Files(f)) => {
+                let task = ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::Loaded)).unwrap();
+                self.tasks.push(task)
             }
             Event::Chunk(Some(chunk)) => {
                 ConsoleService::log(&format!("{:?}", chunk));

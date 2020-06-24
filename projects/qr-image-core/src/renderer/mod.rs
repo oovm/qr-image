@@ -6,7 +6,18 @@ use image::{
 
 impl QrImage {
     fn target_qr(&self, data: &[u8]) -> QrResult<QrCode> {
-        QrCode::with_version(data, self.qr_version, self.ec_level)
+        if self.auto_size {
+            match QrCode::with_version(data, self.qr_version, self.ec_level) {
+                Ok(o) => Ok(o),
+                Err(_) => match QrCode::with_error_correction_level(data, self.ec_level) {
+                    Ok(o) => Ok(o),
+                    Err(_) => QrCode::new(data),
+                },
+            }
+        }
+        else {
+            QrCode::with_version(data, self.qr_version, self.ec_level)
+        }
     }
     pub fn render(&self, data: &[u8], img: &DynamicImage) -> QrResult<DynamicImage> {
         let qr = self.target_qr(data)?;
@@ -100,6 +111,8 @@ pub unsafe fn get_align_locations(qr: &QrCode) -> Vec<(usize, usize)> {
 pub unsafe fn redraw_locations(qr: &QrCode, bg: RgbImage, dark: Rgb<u8>, light: Rgb<u8>, enhanced: bool, skip_bg: bool) -> RgbImage {
     let aligns = get_align_locations(qr);
     let mut qr_img = qr_render_rgb(qr, dark, light);
+    // FIXME:
+    // Too slow, maybe the target image should be modified
     for i in 0..qr_img.width() - 0 {
         for j in 0..qr_img.width() - 0 {
             let _ = skip_bg;

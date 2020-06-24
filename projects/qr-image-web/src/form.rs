@@ -1,15 +1,25 @@
 use crate::{Event, Model};
 use image::{imageops::FilterType, ImageFormat, ImageOutputFormat};
-use qr_image_core::{QrImage, Version};
+use qr_image_core::{EcLevel, QrImage, Version};
 use yew::prelude::*;
 
 impl Model {
-    pub fn qr_version_view(&self) -> String {
+    pub fn format_qr_version(&self) -> String {
         let n = match self.qr_version {
             Version::Normal(i) => i,
             Version::Micro(i) => i,
         };
         return format!("{}", n);
+    }
+
+    pub fn format_ec_level(&self) -> String {
+        let n = match self.ec_level {
+            EcLevel::L => "L",
+            EcLevel::M => "M",
+            EcLevel::Q => "Q",
+            EcLevel::H => "H",
+        };
+        return String::from(n);
     }
 
     pub fn qr_render(&self) -> anyhow::Result<String> {
@@ -19,6 +29,7 @@ impl Model {
             dark_color: self.dark_color,
             light_color: self.light_color,
             enhanced: self.enhanced,
+            auto_size: true,
         };
 
         let input = image::load_from_memory_with_format(&self.image, ImageFormat::Png)?;
@@ -79,12 +90,12 @@ impl Model {
                 <div class="col-sm-8">
                     <div class="form-control-static">
                         <input type="range" min="1" max="10" step="1"
-                            value=self.qr_version_view()
+                            value=self.format_qr_version()
                             onchange=self.link.callback(|input: ChangeData| Event::QRVersion(input))
                         />
                     </div>
                 </div>
-                <label class="col-sm-1 control-label">{self.qr_version_view()}</label>
+                <label class="col-sm-1 control-label">{self.format_qr_version()}</label>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label">{"Output Size:"}</label>
@@ -99,9 +110,12 @@ impl Model {
                 <label class="col-sm-1 control-label">{self.output_size}</label>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label">{"Level:"}</label>
+                <label class="col-sm-3 control-label">{"EC Level:"}</label>
                 <div class="col-sm-9">
-                    <select class="form-control">
+                    <select class="form-control"
+                        value=self.format_ec_level()
+                        onchange=self.link.callback(|input: ChangeData| Event::ECLevel(input))
+                    >
                         <option value="L">{"L"}</option>
                         <option value="Q">{"Q"}</option>
                         <option value="M">{"M"}</option>

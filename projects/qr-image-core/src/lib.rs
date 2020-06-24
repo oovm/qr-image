@@ -14,6 +14,7 @@ pub struct QrImage {
     pub dark_color: Rgb<u8>,
     pub light_color: Rgb<u8>,
     pub enhanced: bool,
+    pub auto_size: bool,
 }
 
 impl Default for QrImage {
@@ -24,6 +25,7 @@ impl Default for QrImage {
             dark_color: Rgb([0, 0, 0]),
             light_color: Rgb([255, 255, 255]),
             enhanced: true,
+            auto_size: false,
         }
     }
 }
