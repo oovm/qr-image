@@ -6,10 +6,7 @@ use std::str::FromStr;
 use yew::{
     html,
     prelude::*,
-    services::{
-        reader::{FileChunk, FileData, ReaderService, ReaderTask},
-        ConsoleService,
-    },
+    services::reader::{FileData, ReaderService, ReaderTask},
     Component, ComponentLink, Html, ShouldRender,
 };
 
@@ -24,7 +21,6 @@ pub enum Event {
     LightColor(ChangeData),
     EnhanceMode(ChangeData),
     Files(ChangeData),
-    Chunk(Option<FileChunk>),
     Loaded(FileData),
 }
 
@@ -100,9 +96,6 @@ impl Component for Model {
                 let task = ReaderService::new().read_file(f.get(0).unwrap(), self.link.callback(Event::Loaded)).unwrap();
                 self.tasks.push(task)
             }
-            Event::Chunk(Some(chunk)) => {
-                ConsoleService::log(&format!("{:?}", chunk));
-            }
             Event::Loaded(data) => {
                 // ConsoleService::log(&format!("{:?}", data));
                 self.image = data.content
@@ -121,10 +114,12 @@ impl Component for Model {
         <main class="container-fluid">
             <div class="page-header">
                 <h1>{"QR Image Embed"}</h1>
+                <span>
                 <iframe
                     src="https://ghbtns.com/github-btn.html?user=GalAster&repo=qr-image&type=star&count=true&size=large"
                     frameborder="0" scrolling="0" width="170" height="30" title="GitHub" loading="lazy"
                 />
+                </span>
             </div>
             {self.form_view()}
         </main>
