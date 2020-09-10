@@ -3,8 +3,8 @@ name = "qr-image-core"
 version = "0.2.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
-repository = "https://github.com/GalAster/qr-art"
-readme = "Readme.md"
+repository = "https://github.com/GalAster/qr-image"
+readme = "../../readme.md"
 license = "MPL-2.0"
 edition = "2018"
 
