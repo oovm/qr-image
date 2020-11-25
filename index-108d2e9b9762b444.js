@@ -373,9 +373,6 @@ async function init(input) {
     imports.wbg.__wbg_readAsArrayBuffer_311dae7058bbb855 = handleError(function(arg0, arg1) {
         getObject(arg0).readAsArrayBuffer(getObject(arg1));
     });
-    imports.wbg.__wbg_log_3bafd82835c6de6d = function(arg0) {
-        console.log(getObject(arg0));
-    };
     imports.wbg.__wbg_querySelector_69fd5cd784bcc892 = handleError(function(arg0, arg1, arg2) {
         var ret = getObject(arg0).querySelector(getStringFromWasm0(arg1, arg2));
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
@@ -546,8 +543,8 @@ async function init(input) {
         var ret = getObject(arg0) instanceof HTMLSelectElement;
         return ret;
     };
-    imports.wbg.__wbindgen_closure_wrapper938 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 74, __wbg_adapter_18);
+    imports.wbg.__wbindgen_closure_wrapper920 = function(arg0, arg1, arg2) {
+        var ret = makeMutClosure(arg0, arg1, 72, __wbg_adapter_18);
         return addHeapObject(ret);
     };
 
