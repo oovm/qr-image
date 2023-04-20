@@ -1,6 +1,6 @@
 [package]
 name = "qr-image-core"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Aster <192607617@qq.com>"]
 description = "Create QR code from a image."
 repository = "https://github.com/oovm/qr-image"
