@@ -5,7 +5,7 @@ pub use crate::drawer::Canvas;
 pub use image::{Luma, Rgb};
 pub use qrcode::{types::QrError, EcLevel, QrCode, Version};
 
-pub type QrResult<T> = std::result::Result<T, QrError>;
+pub type QrResult<T> = Result<T, QrError>;
 
 #[derive(Debug, Clone)]
 pub struct QrImage {

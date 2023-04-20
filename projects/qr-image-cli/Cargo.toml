@@ -11,7 +11,7 @@ edition = "2018"
 
 [dependencies]
 qr-image-core = { version = "0.2", path = "../qr-image-core" }
-clap = "2.33"
+clap = "4.2"
 
 [dev-dependencies]
 

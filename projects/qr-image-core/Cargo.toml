@@ -2,17 +2,18 @@
 name = "qr-image-core"
 version = "0.2.0"
 authors = ["Aster <192607617@qq.com>"]
-description = "..."
-repository = "https://github.com/GalAster/qr-image"
+description = "Create QR code from a image."
+repository = "https://github.com/oovm/qr-image"
+documentation = "https://docs.rs/qr-image"
 readme = "../../readme.md"
 license = "MPL-2.0"
 edition = "2018"
 
 [dependencies]
-image = "0.23"
-pix = "0.13"
+image = "0.23.14"
+#pix = "0.13.2"
 # qrcode-generator = "4.0"
-qrcode = "0.12"
+qrcode = "0.12.0"
 
 [dev-dependencies]
 
