@@ -14,3 +14,5 @@ fn test() {
     let code = cfg.render("苟利国家生死以".as_bytes(), &img).unwrap();
     code.save("./tests/wolfram-wolf.qr.png").unwrap();
 }
+
+
